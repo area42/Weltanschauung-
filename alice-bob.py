@@ -4,7 +4,7 @@ from curses import wrapper
 device = torch.device('cpu')
 # device = torch.device('cuda') # Uncomment this to run on GPU
 
-rows = 35
+headerrows = 5
 cols = 5
 colw = 35
 
@@ -64,6 +64,8 @@ class wv:
 
 def learning_loop(stdscr):
     stdscr.clear()
+    height,width = stdscr.getmaxyx()
+    ewidth = divmod(width,colw)[0]*colw
     #inital statement
     start = "alice"
     for c in range(500):
@@ -94,13 +96,18 @@ def learning_loop(stdscr):
                 turn = "alice"
 
             if t == 2:
-                my,mx=divmod(c,rows)
-                wc,cy=divmod(my*colw,cols*colw)
+                my,mx=divmod(c,height-headerrows)
+                wc,cy=divmod(my*colw,ewidth)
+
+                cmy,cmx=divmod(c+1,height-headerrows)
+                cwc,ccy=divmod(cmy*colw,ewidth)
+
                 if lossbob > lossalice:
                     loser = "b"
                 else:
                     loser = "a"
-                stdscr.addstr(6+mx,cy,"%1s %s %d : %-10f (%10f)" % (turn[0],loser,c,max(lossbob,lossalice),abs(lossbob-lossalice)))
+                stdscr.addstr(headerrows+mx,cy,"%1s %s %d : %-10f (%10f)" % (turn[0],loser,c,max(lossbob,lossalice),abs(lossbob-lossalice)))
+                stdscr.addstr(headerrows+cmx,ccy,"%35s" % (" "))
             stdscr.refresh()
 
 learning_rate = 1e-6
